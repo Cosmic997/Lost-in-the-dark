@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Forsaken Manor — 2D Horror Game</title>
+<meta name="description" content="Survive the darkness. Escape the entity. The Forsaken Manor is a free browser-based 2D horror game.">
+<meta property="og:title" content="The Forsaken Manor — 2D Horror Game">
+<meta property="og:description" content="You wake in darkness. Something watches from the shadows. Find the cursed relics. Escape the entity. Or become part of the manor forever.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://placehold.co/1200x630/0a0a0a/c00?text=THE+FORSAKEN+MANOR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Forsaken Manor — 2D Horror Game">
+<meta name="twitter:description" content="A free browser-based 2D horror game. No downloads. No installs. Just fear.">
+<meta name="theme-color" content="#cc0000">
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #c00;
+    --dark-red: #600;
+    --bg: #0a0a0a;
+    --card-bg: #111;
+    --text: #ccc;
+    --text-dim: #666;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #1a0000;
+    padding: 0 40px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: 'Creepster', cursive;
+    font-size: 26px;
+    color: var(--red);
+    text-shadow: 0 0 15px rgba(200,0,0,0.5);
+    text-decoration: none;
+    letter-spacing: 2px;
+  }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a {
+    color: #888;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    transition: color 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .nav-links a:hover { color: var(--red); }
+  .nav-cta {
+    background: var(--dark-red);
+    color: #f66 !important;
+    padding: 8px 20px;
+    border: 1px solid var(--red);
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
+  .nav-cta:hover { background: var(--red); color: #fff !important; }
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  #hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 50% 80%, rgba(100,0,0,0.15), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-particles {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .hero-particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: rgba(200,0,0,0.3);
+    border-radius: 50%;
+    animation: float-up linear infinite;
+  }
+  @keyframes float-up {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-20vh) scale(1); opacity: 0; }
+  }
+  .hero-title {
+    font-family: 'Creepster', cursive;
+    font-size: clamp(48px, 8vw, 100px);
+    color: var(--red);
+    text-shadow: 0 0 30px rgba(200,0,0,0.6), 0 0 80px rgba(100,0,0,0.3);
+    letter-spacing: 6px;
+    animation: hero-flicker 5s infinite;
+    margin-bottom: 16px;
+  }
+  @keyframes hero-flicker {
+    0%,92%,100% { opacity: 1; }
+    93% { opacity: 0.3; }
+    94% { opacity: 0.8; }
+    95% { opacity: 0.2; }
+    96% { opacity: 0.9; }
+    97% { opacity: 0.4; }
+    98% { opacity: 1; }
+  }
+  .hero-subtitle {
+    font-size: clamp(16px, 2.5vw, 22px);
+    color: #888;
+    max-width: 600px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+  .hero-buttons { display: flex; gap: 16px; }
+  .btn-play {
+    padding: 14px 48px;
+    font-family: 'Creepster', cursive;
+    font-size: 20px;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, #800, var(--red));
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+    border-radius: 4px;
+    box-shadow: 0 0 30px rgba(200,0,0,0.3);
+  }
+  .btn-play:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 50px rgba(200,0,0,0.5);
+  }
+  .btn-secondary {
+    padding: 14px 36px;
+    font-size: 15px;
+    background: transparent;
+    color: #888;
+    border: 1px solid #333;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+    border-radius: 4px;
+  }
+  .btn-secondary:hover { border-color: #888; color: #ccc; }
+  .scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    animation: bounce 2s infinite;
+    color: #444;
+    font-size: 24px;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+  section { padding: 100px 40px; max-width: 1200px; margin: 0 auto; }
+  .section-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: var(--red);
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Creepster', cursive;
+    font-size: clamp(32px, 5vw, 52px);
+    color: #eee;
+    margin-bottom: 16px;
+  }
+  .section-desc {
+    font-size: 16px;
+    color: #777;
+    max-width: 550px;
+    line-height: 1.7;
+    margin-bottom: 48px;
+  }
+  #story { border-top: 1px solid #1a0000; }
+  .story-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+  .story-text {
+    font-size: 15px;
+    color: #888;
+    line-height: 1.9;
+  }
+  .story-text p { margin-bottom: 16px; }
+  .story-text .highlight { color: var(--red); font-weight: 600; }
+  .story-image {
+    background: linear-gradient(135deg, #150505, #0a0a0a);
+    border: 1px solid #200;
+    border-radius: 8px;
+    padding: 60px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .story-image::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(200,0,0,0.08), transparent 70%);
+    pointer-events: none;
+  }
+  .manor-icon { font-size: 80px; filter: grayscale(0.5) brightness(0.8); }
+  .story-caption { color: #555; font-size: 13px; margin-top: 16px; font-style: italic; }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+  }
+  .feature-card {
+    background: var(--card-bg);
+    border: 1px solid #1a0000;
+    border-radius: 8px;
+    padding: 32px 24px;
+    transition: all 0.3s;
+  }
+  .feature-card:hover {
+    border-color: #400;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(100,0,0,0.15);
+  }
+  .feature-icon { font-size: 32px; margin-bottom: 16px; }
+  .feature-title { font-size: 18px; font-weight: 600; color: #ddd; margin-bottom: 8px; }
+  .feature-desc { font-size: 14px; color: #666; line-height: 1.6; }
+  .controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .control-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--card-bg);
+    border: 1px solid #1a0a0a;
+    border-radius: 8px;
+    padding: 16px 20px;
+  }
+  .control-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 44px;
+    background: #1a1010;
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #ddd;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 2px 0 #222;
+  }
+  .control-label { font-size: 14px; color: #888; }
+  #play {
+    border-top: 1px solid #1a0000;
+    text-align: center;
+  }
+  .game-container {
+    position: relative;
+    background: #000;
+    border: 2px solid #300;
+    border-radius: 8px;
+    overflow: hidden;
+    display: inline-block;
+    max-width: 100%;
+    box-shadow: 0 0 60px rgba(100,0,0,0.2);
+  }
+  .tips-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .tip-item {
+    background: var(--card-bg);
+    border: 1px solid #1a0000;
+    border-radius: 8px;
+    padding: 20px 24px;
+    font-size: 14px;
+    color: #888;
+    line-height: 1.6;
+  }
+  .tip-item strong { color: var(--red); }
+  footer {
+    border-top: 1px solid #1a0000;
+    padding: 40px;
+    text-align: center;
+    color: #333;
+    font-size: 13px;
+  }
+  footer a { color: #555; text-decoration: none; }
+  footer a:hover { color: var(--red); }
+  .footer-logo {
+    font-family: 'Creepster', cursive;
+    font-size: 22px;
+    color: var(--dark-red);
+    margin-bottom: 12px;
+  }
+  #gameCanvas { display: block; cursor: none; }
+  #gameHUD {
+    position: absolute;
+    top: 12px; left: 12px;
+    color: #aaa;
+    font-size: 13px;
+    z-index: 5;
+    pointer-events: none;
+    font-family: 'Courier New', monospace;
+  }
+  #gameHUD div { margin: 3px 0; }
+  .bar-bg { width: 100px; height: 6px; background: #222; display: inline-block; vertical-align: middle; margin-left: 4px; border-radius: 3px; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+  .bar-hp { background: #f44; }
+  .bar-sanity { background: #48f; }
+  .bar-battery { background: #ff0; }
+  #gameMsgs {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ccc;
+    font-size: 14px;
+    z-index: 5;
+    pointer-events: none;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 10px #000;
+    transition: opacity 0.5s;
+  }
+  #gameKeyStatus { color: #ff0; display: none; }
+  .game-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.95);
+    z-index: 10;
+    text-align: center;
+  }
+  .game-overlay h1 {
+    font-family: 'Creepster', cursive;
+    letter-spacing: 4px;
+    margin-bottom: 16px;
+  }
+  .game-overlay p { color: #888; font-size: 15px; margin: 6px 0; max-width: 400px; line-height: 1.6; }
+  .game-overlay .btn-play { margin-top: 24px; font-size: 17px; padding: 12px 36px; }
+  #startOverlay h1 { font-size: 42px; color: var(--red); text-shadow: 0 0 20px rgba(200,0,0,0.6); animation: hero-flicker 5s infinite; }
+  #startOverlay .controls-hint { color: #555; font-size: 13px; margin-top: 8px; font-family: 'Courier New', monospace; }
+  #deathOverlay { display: none; }
+  #deathOverlay h1 { font-size: 52px; color: #f00; text-shadow: 0 0 30px #f00; animation: death-pulse 0.5s infinite; }
+  @keyframes death-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  #winOverlay { display: none; }
+  #winOverlay h1 { font-size: 38px; color: #4f4; text-shadow: 0 0 20px rgba(0,255,0,0.5); }
+  #jumpOverlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 20;
+    display: none;
+  }
+  #jumpCanvas { width: 100%; height: 100%; }
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { gap: 16px; }
+    .nav-links a { font-size: 12px; }
+    section { padding: 60px 20px; }
+    .story-content { grid-template-columns: 1fr; }
+    .hero-buttons { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a href="#hero" class="nav-logo">The Forsaken Manor</a>
+  <div class="nav-links">
+    <a href="#story">Story</a>
+    <a href="#features">Features</a>
+    <a href="#controls">Controls</a>
+    <a href="#tips">Tips</a>
+    <a href="#play" class="nav-cta">Play Now</a>
+  </div>
+</nav>
+<section id="hero">
+  <div class="hero-particles" id="heroParticles"></div>
+  <h1 class="hero-title">THE FORSAKEN MANOR</h1>
+  <p class="hero-subtitle">You wake in darkness. Something watches from the shadows. Find the cursed relics. Escape the entity. Or become part of the manor forever.</p>
+  <div class="hero-buttons">
+    <a href="#play" class="btn-play">&#9654; PLAY NOW</a>
+    <a href="#story" class="btn-secondary">Learn the Story</a>
+  </div>
+  <div class="scroll-indicator">&#9660;</div>
+</section>
+<section id="story">
+  <p class="section-label">The Lore</p>
+  <h2 class="section-title">What Lurks Within</h2>
+  <div class="story-content">
+    <div class="story-text">
+      <p>The Forsaken Manor was once home to a wealthy family who dabbled in dark rituals. One night, their ceremonies tore a rift between worlds — and <span class="highlight">something crossed over</span>.</p>
+      <p>The entity bound itself to three cursed relics, anchoring itself to the manor. Whoever possesses the relics can <span class="highlight">weaken the entity</span> — but only those who find the exit key can truly leave.</p>
+      <p>Many have entered. None have returned. The manor's halls shift in the dark. The walls whisper. And <span class="highlight">it is always watching</span>.</p>
+      <p>Now you wake on the cold stone floor, flashlight flickering, with no memory of how you arrived. The door behind you has vanished. The only way out... is through.</p>
+    </div>
+    <div class="story-image">
+      <div class="manor-icon">&#127964;</div>
+      <p class="story-caption">"The manor breathes. It remembers. It hungers."</p>
+    </div>
+  </div>
+</section>
+<section id="features">
+  <p class="section-label">Gameplay</p>
+  <h2 class="section-title">Survive the Night</h2>
+  <p class="section-desc">Every mechanic is designed to keep you on edge. The darkness is your enemy — and your only ally.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">&#128294;</div>
+      <div class="feature-title">Flashlight System</div>
+      <div class="feature-desc">Aim your flashlight with the mouse. Battery drains over time. Turn it off to hide — but the darkness eats your sanity.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128126;</div>
+      <div class="feature-title">Entity AI</div>
+      <div class="feature-desc">The entity patrols, hunts, and searches. It sees your flashlight from far away. In the dark, you're invisible — but not safe.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#129684;</div>
+      <div class="feature-title">Cursed Relics</div>
+      <div class="feature-desc">Collect 3 relics to weaken the entity. Each one makes it slower and less perceptive — but also angrier.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#129504;</div>
+      <div class="feature-title">Sanity Mechanic</div>
+      <div class="feature-desc">Stay in darkness too long and your mind fractures. Hallucinations. Screen distortion. You start seeing things that aren't there.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128128;</div>
+      <div class="feature-title">Jump Scares</div>
+      <div class="feature-desc">Random terrifying events. Faces in the dark. Sudden screams. Not recommended for the faint of heart.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128220;</div>
+      <div class="feature-title">Scattered Notes</div>
+      <div class="feature-desc">Find notes from those who came before. Their warnings. Their madness. Their final words carved into the walls.</div>
+    </div>
+  </div>
+</section>
+<section id="controls">
+  <p class="section-label">How to Play</p>
+  <h2 class="section-title">Master the Controls</h2>
+  <p class="section-desc">Simple controls. Impossible survival. Every second counts when the entity is near.</p>
+  <div class="controls-grid">
+    <div class="control-item">
+      <div class="control-key">W A S D</div>
+      <div class="control-label">Move through the manor</div>
+    </div>
+    <div class="control-item">
+      <div class="control-key">Mouse</div>
+      <div class="control-label">Aim your flashlight</div>
+    </div>
+    <div class="control-item">
+      <div class="control-key">F</div>
+      <div class="control-label">Toggle flashlight on / off</div>
+    </div>
+    <div class="control-item">
+      <div class="control-key">E</div>
+      <div class="control-label">Interact with items and doors</div>
+    </div>
+  </div>
+</section>
+<section id="tips">
+  <p class="section-label">Survival Guide</p>
+  <h2 class="section-title">Don't Die</h2>
+  <p class="section-desc">These tips might keep you alive. Probably not though.</p>
+  <ul class="tips-list">
+    <li class="tip-item"><strong>Turn off your flashlight</strong> when you hear the entity nearby. It can't see you in the dark from far away — but staying in darkness drains your sanity.</li>
+    <li class="tip-item"><strong>Collect batteries</strong> whenever you find them. A dead flashlight means total darkness and rapid sanity loss.</li>
+    <li class="tip-item"><strong>Grab all 3 relics</strong> as soon as possible. Each relic weakens the entity, making it slower and less able to detect you.</li>
+    <li class="tip-item"><strong>Read the notes</strong> — they contain lore and subtle hints about where to find key items.</li>
+    <li class="tip-item"><strong>The exit key is in the basement.</strong> Get it, then find the exit door. You need the key to escape.</li>
+    <li class="tip-item"><strong>Don't run in a straight line</strong> from the entity. Use walls and corridors to break line of sight.</li>
+  </ul>
+</section>
+<section id="play">
+  <p class="section-label">Enter the Manor</p>
+  <h2 class="section-title">Play Now</h2>
+  <p class="section-desc">No downloads. No installs. Just you, the darkness, and what waits inside.</p>
+  <div class="game-container" id="gameContainer">
+    <canvas id="gameCanvas" width="960" height="640"></canvas>
+    <div id="gameHUD">
+      <div>HP: <span id="hpVal">100</span> <div class="bar-bg"><div class="bar-fill bar-hp" id="hpBar" style="width:100%"></div></div></div>
+      <div>Sanity: <span id="sanityVal">100</span> <div class="bar-bg"><div class="bar-fill bar-sanity" id="sanityBar" style="width:100%"></div></div></div>
+      <div>Battery: <span id="batteryVal">100</span> <div class="bar-bg"><div class="bar-fill bar-battery" id="batteryBar" style="width:100%"></div></div></div>
+      <div>Relics: <span id="relicVal">0</span>/3</div>
+      <div id="gameKeyStatus">EXIT KEY: FOUND</div>
+    </div>
+    <div id="gameMsgs"></div>
+    <div class="game-overlay" id="startOverlay">
+      <h1>THE FORSAKEN MANOR</h1>
+      <p>You wake up in a dark, abandoned manor with no memory of how you got here.</p>
+      <p>Something lurks in the shadows... Find 3 cursed relics and the exit key to escape.</p>
+      <p class="controls-hint">WASD move | Mouse aim | F flashlight | E interact</p>
+      <button class="btn-play" onclick="startGame()">Enter the Manor</button>
+    </div>
+    <div class="game-overlay" id="deathOverlay">
+      <h1>YOU DIED</h1>
+      <p id="deathMsg">The darkness consumed you...</p>
+      <button class="btn-play" onclick="startGame()">Try Again</button>
+    </div>
+    <div class="game-overlay" id="winOverlay">
+      <h1>YOU ESCAPED</h1>
+      <p>You made it out alive... but the manor's curse still lingers in your mind.</p>
+      <button class="btn-play" onclick="startGame()">Play Again</button>
+    </div>
+    <div id="jumpOverlay">
+      <canvas id="jumpCanvas"></canvas>
+    </div>
+  </div>
+</section>
+<footer>
+  <div class="footer-logo">The Forsaken Manor</div>
+  <p>A free browser-based 2D horror game. No downloads. No installs. Just fear.</p>
+  <p style="margin-top:8px;">Play at your own risk. Headphones recommended.</p>
+</footer>
+<script>
+(function() {
+  const container = document.getElementById('heroParticles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'hero-particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (5 + Math.random() * 10) + 's';
+    p.style.animationDelay = Math.random() * 10 + 's';
+    p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+    container.appendChild(p);
+  }
+})();
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const jumpCanvas = document.getElementById('jumpCanvas');
+const jumpCtx = jumpCanvas.getContext('2d');
+const GAME_W = 960, GAME_H = 640;
+const TILE = 32;
+
+function resizeGameCanvas() {
+  const maxW = Math.min(960, window.innerWidth - 80);
+  const ratio = maxW / GAME_W;
+  canvas.style.width = maxW + 'px';
+  canvas.style.height = (GAME_H * ratio) + 'px';
+  jumpCanvas.width = parseInt(canvas.style.width);
+  jumpCanvas.height = parseInt(canvas.style.height);
+}
+resizeGameCanvas();
+window.addEventListener('resize', resizeGameCanvas);
+
+const MAP_COLS = 30, MAP_ROWS = 22;
+let mapData;
+const MAP_TEMPLATE = [
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
+  1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
+  1,0,0,6,0,1,0,0,0,0,7,0,0,1,0,0,0,0,0,1,0,0,0,3,0,0,0,0,0,1,
+  1,0,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,1,
+  1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,2,1,1,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+  1,0,0,0,0,0,0,0,8,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,
+  1,1,1,1,0,1,1,1,1,1,1,0,1,0,0,0,3,0,0,0,1,0,1,1,1,1,0,1,1,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,
+  1,0,0,3,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,1,1,2,1,1,0,1,1,1,0,0,0,0,0,0,0,0,1,
+  1,1,1,0,1,1,1,2,1,1,1,1,1,0,0,0,1,0,0,0,1,1,1,0,1,1,1,1,1,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,
+  1,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,4,0,0,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,
+  1,1,1,1,1,0,1,1,1,1,0,1,1,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,1,
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+];
+
+function getTile(c,r){if(c<0||c>=MAP_COLS||r<0||r>=MAP_ROWS)return 1;return mapData[r*MAP_COLS+c];}
+function setTile(c,r,v){if(c>=0&&c<MAP_COLS&&r>=0&&r<MAP_ROWS)mapData[r*MAP_COLS+c]=v;}
+
+let gameState='start',player,monster,particles,relicsCollected,hasExitKey;
+let keys={},mouseX=GAME_W/2,mouseY=GAME_H/2;
+let cameraX=0,cameraY=0,msgText='',msgTimer=0;
+let jumpScareTimer=0,ambientTimer=0,screenShake=0,time=0;
+
+const NOTES=[
+  "Day 3: The shadows move when I'm not looking...",
+  "HELP ME. It won't let me leave. The door is gone.",
+  "The relics are cursed but they weaken the entity. Find all three.",
+  "The exit key is in the basement. Don't let it see you.",
+  "I can hear breathing that isn't mine...",
+];
+let notes;
+
+function initGame(){
+  mapData=[...MAP_TEMPLATE];
+  player={x:TILE*1.5,y:TILE*1.5,w:14,h:14,speed:2.2,hp:100,maxHp:100,sanity:100,battery:100,flashlightOn:true,invulnTimer:0,angle:0};
+  monster={x:TILE*20,y:TILE*16,w:18,h:18,speed:1.3,patrolAngle:0,state:'patrol',alertTimer:0,lastSeenX:0,lastSeenY:0,patrolPoints:[{x:TILE*20,y:TILE*16},{x:TILE*25,y:TILE*16},{x:TILE*25,y:TILE*19},{x:TILE*20,y:TILE*19}],patrolIdx:0,animTimer:0};
+  particles=[];relicsCollected=0;hasExitKey=false;notes=NOTES.slice();
+  cameraX=0;cameraY=0;screenShake=0;msgText='';msgTimer=0;jumpScareTimer=0;time=0;ambientTimer=0;
+  document.getElementById('gameKeyStatus').style.display='none';
+}
+
+window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(['w','a','s','d','f','e','arrowup','arrowdown','arrowleft','arrowright'].includes(e.key.toLowerCase()))e.preventDefault();});
+window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+window.addEventListener('mousemove',e=>{const rect=canvas.getBoundingClientRect();const scaleX=GAME_W/rect.width;const scaleY=GAME_H/rect.height;mouseX=(e.clientX-rect.left)*scaleX;mouseY=(e.clientY-rect.top)*scaleY;});
+
+function tileCollision(x,y,w,h){
+  const l=Math.floor(x/TILE),r=Math.floor((x+w)/TILE),t=Math.floor(y/TILE),b=Math.floor((y+h)/TILE);
+  for(let row=t;row<=b;row++)for(let col=l;col<=r;col++){const v=getTile(col,row);if(v===1||v===2||v===5)return true;}
+  return false;
+}
+function dist(x1,y1,x2,y2){return Math.sqrt((x2-x1)**2+(y2-y1)**2);}
+
+function drawLighting(){
+  const px=player.x+player.w/2-cameraX,py=player.y+player.h/2-cameraY;
+  ctx.save();
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle='rgba(0,0,0,0.92)';
+  ctx.fillRect(0,0,GAME_W,GAME_H);
+  ctx.globalCompositeOperation='destination-out';
+  if(player.flashlightOn&&player.battery>0){
+    const angle=Math.atan2(mouseY-py,mouseX-px);
+    const coneAngle=0.4,radius=200,flicker=0.95+Math.random()*0.1;
+    ctx.beginPath();ctx.moveTo(px,py);ctx.arc(px,py,radius*flicker,angle-coneAngle,angle+coneAngle);ctx.closePath();
+    ctx.fillStyle='rgba(255,255,255,0.95)';ctx.fill();
+    const amb=ctx.createRadialGradient(px,py,0,px,py,40);
+    amb.addColorStop(0,'rgba(255,255,255,0.4)');amb.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=amb;ctx.beginPath();ctx.arc(px,py,40,0,Math.PI*2);ctx.fill();
+  } else {
+    const amb=ctx.createRadialGradient(px,py,0,px,py,20);
+    amb.addColorStop(0,'rgba(255,255,255,0.15)');amb.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=amb;ctx.beginPath();ctx.arc(px,py,20,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+}
+
+function updateMonster(){
+  monster.animTimer+=0.05;
+  const px=player.x+player.w/2,py=player.y+player.h/2;
+  const mx=monster.x+monster.w/2,my=monster.y+monster.h/2;
+  const d=dist(px,py,mx,my);
+  let canSee=false;
+  if(d<280&&player.flashlightOn)canSee=true;
+  if(d<120)canSee=true;
+  if(d<180&&!player.flashlightOn)canSee=false;
+  if(relicsCollected>=3&&d>100)canSee=false;
+  switch(monster.state){
+    case 'patrol':{
+      const pp=monster.patrolPoints[monster.patrolIdx];
+      const pdx=pp.x-mx,pdy=pp.y-my,pdist=Math.sqrt(pdx*pdx+pdy*pdy);
+      if(pdist<10)monster.patrolIdx=(monster.patrolIdx+1)%monster.patrolPoints.length;
+      else{const spd=monster.speed*0.5;const nx=monster.x+(pdx/pdist)*spd,ny=monster.y+(pdy/pdist)*spd;if(!tileCollision(nx,ny,monster.w,monster.h)){monster.x=nx;monster.y=ny;}}
+      if(canSee){monster.state='chase';monster.alertTimer=300;showMsg("IT SEES YOU");screenShake=15;}break;
+    }
+    case 'chase':{
+      const cdx=px-mx,cdy=py-my,cdist=Math.sqrt(cdx*cdx+cdy*cdy);
+      const cspd=monster.speed*(relicsCollected>=3?0.6:1.0);
+      const nx2=monster.x+(cdx/cdist)*cspd,ny2=monster.y+(cdy/cdist)*cspd;
+      if(!tileCollision(nx2,ny2,monster.w,monster.h)){monster.x=nx2;monster.y=ny2;}
+      else{if(!tileCollision(nx2,monster.y,monster.w,monster.h))monster.x=nx2;else if(!tileCollision(monster.x,ny2,monster.w,monster.h))monster.y=ny2;}
+      monster.lastSeenX=px;monster.lastSeenY=py;
+      if(!canSee){monster.alertTimer--;if(monster.alertTimer<=0){monster.state='search';monster.alertTimer=180;}}else monster.alertTimer=300;
+      if(d<24){player.hp-=30;player.invulnTimer=30;screenShake=20;showMsg("IT HURTS");player.x-=(cdx/cdist)*30;player.y-=(cdy/cdist)*30;if(player.hp<=0)die("The entity consumed your soul.");}
+      break;
+    }
+    case 'search':{
+      const sdx=monster.lastSeenX-mx,sdy=monster.lastSeenY-my,sdist=Math.sqrt(sdx*sdx+sdy*sdy);
+      if(sdist>5){const nx3=monster.x+(sdx/sdist)*monster.speed*0.5,ny3=monster.y+(sdy/sdist)*monster.speed*0.5;if(!tileCollision(nx3,ny3,monster.w,monster.h)){monster.x=nx3;monster.y=ny3;}}
+      monster.alertTimer--;if(monster.alertTimer<=0)monster.state='patrol';
+      if(canSee){monster.state='chase';monster.alertTimer=300;showMsg("IT FOUND YOU");screenShake=15;}
+      break;
+    }
+  }
+}
+
+function spawnParticle(x,y,color,life){particles.push({x,y,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2-0.5,color,life,maxLife:life,size:2+Math.random()*3});}
+function updateParticles(){for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.life--;if(p.life<=0)particles.splice(i,1);}}
+function drawParticles(){for(const p of particles){const alpha=p.life/p.maxLife;ctx.globalAlpha=alpha;ctx.fillStyle=p.color;ctx.fillRect(p.x-cameraX,p.y-cameraY,p.size,p.size);}ctx.globalAlpha=1;}
+
+function updatePlayer(){
+  let dx=0,dy=0;
+  if(keys['w']||keys['arrowup'])dy=-1;if(keys['s']||keys['arrowdown'])dy=1;
+  if(keys['a']||keys['arrowleft'])dx=-1;if(keys['d']||keys['arrowright'])dx=1;
+  if(dx&&dy){dx*=0.707;dy*=0.707;}
+  const nx=player.x+dx*player.speed,ny=player.y+dy*player.speed;
+  if(!tileCollision(nx,player.y,player.w,player.h))player.x=nx;
+  if(!tileCollision(player.x,ny,player.w,player.h))player.y=ny;
+  player.x=Math.max(0,player.x);player.y=Math.max(0,player.y);
+  if(player.invulnTimer>0)player.invulnTimer--;
+  if(keys['f']){keys['f']=false;player.flashlightOn=!player.flashlightOn;}
+  if(player.flashlightOn){player.battery-=0.03;if(player.battery<=0){player.battery=0;player.flashlightOn=false;showMsg("Flashlight died...");}}
+  if(!player.flashlightOn)player.sanity-=0.02;else player.sanity=Math.min(100,player.sanity+0.005);
+  if(player.sanity<=0)player.sanity=0;
+  if(player.sanity<30){if(Math.random()<0.005)screenShake=5;if(Math.random()<0.002)showMsg("...what was that?");}
+  if(keys['e']){
+    keys['e']=false;
+    const col=Math.floor((player.x+player.w/2)/TILE),row=Math.floor((player.y+player.h/2)/TILE);
+    for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+      const at=getTile(col+dc,row+dr);
+      const tx=(col+dc)*TILE,ty=(row+dr)*TILE;
+      if(dist(player.x+player.w/2,player.y+player.h/2,tx+TILE/2,ty+TILE/2)<TILE*1.5){
+        if(at===3){setTile(col+dc,row+dr,0);relicsCollected++;showMsg("Cursed relic collected ("+relicsCollected+"/3)");screenShake=8;for(let i=0;i<15;i++)spawnParticle(tx+TILE/2,ty+TILE/2,'#f0f',40);if(relicsCollected>=3)showMsg("The entity weakens... find the exit key!");}
+        if(at===4){setTile(col+dc,row+dr,0);hasExitKey=true;showMsg("EXIT KEY FOUND! Find the exit door!");document.getElementById('gameKeyStatus').style.display='block';for(let i=0;i<20;i++)spawnParticle(tx+TILE/2,ty+TILE/2,'#ff0',50);}
+        if(at===5&&hasExitKey){win();return;}
+        if(at===5&&!hasExitKey)showMsg("The door is locked. Find the exit key...");
+        if(at===6){setTile(col+dc,row+dr,0);const note=notes.shift()||"The writing is too faded to read...";showMsg("Note: "+note);player.sanity-=5;}
+        if(at===7){setTile(col+dc,row+dr,0);player.hp=Math.min(player.maxHp,player.hp+30);showMsg("Health restored");for(let i=0;i<10;i++)spawnParticle(tx+TILE/2,ty+TILE/2,'#f44',30);}
+        if(at===8){setTile(col+dc,row+dr,0);player.battery=Math.min(100,player.battery+40);showMsg("Battery recharged");for(let i=0;i<10;i++)spawnParticle(tx+TILE/2,ty+TILE/2,'#ff0',30);}
+      }
+    }
+  }
+  const targetCX=player.x+player.w/2-GAME_W/2,targetCY=player.y+player.h/2-GAME_H/2;
+  cameraX+=(targetCX-cameraX)*0.1;cameraY+=(targetCY-cameraY)*0.1;
+  cameraX=Math.max(0,Math.min(cameraX,MAP_COLS*TILE-GAME_W));cameraY=Math.max(0,Math.min(cameraY,MAP_ROWS*TILE-GAME_H));
+  player.angle=Math.atan2(mouseY-(player.y+player.h/2-cameraY),mouseX-(player.x+player.w/2-cameraX));
+}
+
+function drawMap(){
+  const sc=Math.max(0,Math.floor(cameraX/TILE)),ec=Math.min(MAP_COLS,Math.ceil((cameraX+GAME_W)/TILE));
+  const sr=Math.max(0,Math.floor(cameraY/TILE)),er=Math.min(MAP_ROWS,Math.ceil((cameraY+GAME_H)/TILE));
+  for(let row=sr;row<er;row++)for(let col=sc;col<ec;col++){
+    const t=getTile(col,row),sx=col*TILE-cameraX,sy=row*TILE-cameraY;
+    if(t===0){const shade=((col+row)%2===0)?'#1a1a1a':'#161616';ctx.fillStyle=shade;ctx.fillRect(sx,sy,TILE,TILE);if((col*7+row*13)%17===0){ctx.fillStyle='#1f0a0a';ctx.beginPath();ctx.arc(sx+TILE/2,sy+TILE/2,6,0,Math.PI*2);ctx.fill();}}
+    else if(t===1){ctx.fillStyle='#2a2020';ctx.fillRect(sx,sy,TILE,TILE);ctx.fillStyle='#352a2a';ctx.fillRect(sx+2,sy+2,TILE-4,TILE-4);ctx.strokeStyle='#2a1a1a';ctx.beginPath();ctx.moveTo(sx,sy+TILE/3);ctx.lineTo(sx+TILE,sy+TILE/3);ctx.moveTo(sx,sy+2*TILE/3);ctx.lineTo(sx+TILE,sy+2*TILE/3);ctx.stroke();}
+    else if(t===2){ctx.fillStyle='#1a1a1a';ctx.fillRect(sx,sy,TILE,TILE);ctx.fillStyle='#4a3020';ctx.fillRect(sx+4,sy+2,TILE-8,TILE-4);}
+    else if(t===3){ctx.fillStyle='#1a1a1a';ctx.fillRect(sx,sy,TILE,TILE);const glow=0.5+Math.sin(time*3)*0.3;ctx.fillStyle='rgba(200,0,200,'+glow+')';ctx.beginPath();ctx.arc(sx+TILE/2,sy+TILE/2,8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f0f';ctx.font='16px serif';ctx.fillText('\u25C6',sx+TILE/2-6,sy+TILE/2+5);}
+    else if(t===4){ctx.fillStyle='#1a1a1a';ctx.fillRect(sx,sy,TILE,TILE);const glow=0.6+Math.sin(time*4)*0.3;ctx.fillStyle='rgba(255,255,0,'+glow+')';ctx.beginPath();ctx.arc(sx+TILE/2,sy+TILE/2,6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff0';ctx.font='14px serif';ctx.fillText('\uD83D\uDD11',sx+TILE/2-7,sy+TILE/2+5);}
+    else if(t===5){ctx.fillStyle='#1a1a1a';ctx.fillRect(sx,sy,TILE,TILE);ctx.fillStyle='#604020';ctx.fillRect(sx+2,sy,TILE-4,TILE);ctx.fillStyle=hasExitKey?'#0f0':'#f00';ctx.beginPath();ctx.arc(sx+TILE-8,sy+TILE/2,3,0,Math.PI*2);ctx.fill();}
+    else if(t===6){ctx.fillStyle='#1a1a1a';ctx.fillRect(sx,sy,TILE,TILE);ctx.fillStyle='#ddd';ctx.fillRect(sx+8,sy+4,16,22);ctx.fillStyle='#444';ctx.fillRect(sx+10,sy+8,12,1);ctx.fillRect(sx+10,sy+12,12,1);ctx.fillRect(sx+10,sy+16,8,1);}
+    else if(t===7){ctx.fillStyle='#1a1a1a';ctx.fillRect(sx,sy,TILE,TILE);const glow=0.6+Math.sin(time*2)*0.2;ctx.fillStyle='rgba(255,50,50,'+glow+')';ctx.beginPath();ctx.arc(sx+TILE/2,sy+TILE/2,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f44';ctx.font='16px serif';ctx.fillText('+',sx+TILE/2-5,sy+TILE/2+5);}
+    else if(t===8){ctx.fillStyle='#1a1a1a';ctx.fillRect(sx,sy,TILE,TILE);const glow=0.6+Math.sin(time*2.5)*0.2;ctx.fillStyle='rgba(255,255,0,'+glow+')';ctx.beginPath();ctx.arc(sx+TILE/2,sy+TILE/2,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff0';ctx.font='12px serif';ctx.fillText('\u26A1',sx+TILE/2-7,sy+TILE/2+5);}
+  }
+}
+
+function drawPlayer(){
+  const sx=player.x-cameraX,sy=player.y-cameraY;
+  if(player.invulnTimer>0&&Math.floor(player.invulnTimer)%4<2)return;
+  ctx.fillStyle='#8af';ctx.fillRect(sx,sy,player.w,player.h);
+  const ex=sx+player.w/2,ey=sy+player.h/3;
+  ctx.fillStyle='#fff';ctx.fillRect(ex-3,ey-1,3,2);ctx.fillRect(ex+1,ey-1,3,2);
+}
+
+function drawMonster(){
+  const sx=monster.x-cameraX,sy=monster.y-cameraY,wobble=Math.sin(monster.animTimer*3)*2;
+  const auraSize=25+Math.sin(monster.animTimer*2)*5;
+  const aura=ctx.createRadialGradient(sx+monster.w/2,sy+monster.h/2,0,sx+monster.w/2,sy+monster.h/2,auraSize);
+  aura.addColorStop(0,'rgba(80,0,0,0.3)');aura.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=aura;ctx.beginPath();ctx.arc(sx+monster.w/2,sy+monster.h/2,auraSize,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#100';ctx.fillRect(sx+wobble,sy,monster.w,monster.h);
+  ctx.fillStyle='#200';ctx.fillRect(sx+wobble+2,sy+2,monster.w-4,monster.h-4);
+  const blinkOff=(Math.floor(monster.animTimer*10)%30===0)?0:1;
+  if(blinkOff){ctx.fillStyle='#f00';ctx.fillRect(sx+wobble+3,sy+4,3,3);ctx.fillRect(sx+wobble+monster.w-6,sy+4,3,3);
+  ctx.fillStyle='rgba(255,0,0,0.5)';ctx.beginPath();ctx.arc(sx+wobble+4,sy+5,6,0,Math.PI*2);ctx.arc(sx+wobble+monster.w-5,sy+5,6,0,Math.PI*2);ctx.fill();}
+  ctx.strokeStyle='#200';ctx.lineWidth=2;for(let i=0;i<3;i++){const tAngle=monster.animTimer+i*2.1;const tx=sx+monster.w/2+Math.cos(tAngle)*12,ty=sy+monster.h+Math.sin(tAngle)*8;ctx.beginPath();ctx.moveTo(sx+monster.w/2,sy+monster.h);ctx.quadraticCurveTo(sx+monster.w/2+Math.cos(tAngle)*5,sy+monster.h+5,tx,ty);ctx.stroke();}
+}
+
+function drawHUD(){
+  document.getElementById('hpVal').textContent=Math.max(0,Math.round(player.hp));
+  document.getElementById('hpBar').style.width=Math.max(0,player.hp)+'%';
+  document.getElementById('sanityVal').textContent=Math.max(0,Math.round(player.sanity));
+  document.getElementById('sanityBar').style.width=Math.max(0,player.sanity)+'%';
+  document.getElementById('batteryVal').textContent=Math.max(0,Math.round(player.battery));
+  document.getElementById('batteryBar').style.width=Math.max(0,player.battery)+'%';
+  document.getElementById('relicVal').textContent=relicsCollected;
+}
+
+function showMsg(t){msgText=t;msgTimer=120;document.getElementById('gameMsgs').textContent=t;document.getElementById('gameMsgs').style.opacity=1;}
+function updateMessages(){if(msgTimer>0){msgTimer--;if(msgTimer<30)document.getElementById('gameMsgs').style.opacity=msgTimer/30;}}
+
+function triggerJumpscare(){
+  jumpScareTimer=30;document.getElementById('jumpOverlay').style.display='block';screenShake=25;
+  jumpCtx.fillStyle='#000';jumpCtx.fillRect(0,0,jumpCanvas.width,jumpCanvas.height);
+  const cx=jumpCanvas.width/2,cy=jumpCanvas.height/2,s=Math.min(jumpCanvas.width,jumpCanvas.height)*0.3;
+  jumpCtx.fillStyle='#100';jumpCtx.beginPath();jumpCtx.ellipse(cx,cy,s,s*1.2,0,0,Math.PI*2);jumpCtx.fill();
+  jumpCtx.fillStyle='#f00';jumpCtx.beginPath();jumpCtx.ellipse(cx-s*0.3,cy-s*0.2,s*0.25,s*0.35,0,0,Math.PI*2);jumpCtx.ellipse(cx+s*0.3,cy-s*0.2,s*0.25,s*0.35,0,0,Math.PI*2);jumpCtx.fill();
+  jumpCtx.fillStyle='#300';jumpCtx.beginPath();jumpCtx.ellipse(cx,cy+s*0.4,s*0.4,s*0.3,0,0,Math.PI);jumpCtx.fill();
+  jumpCtx.fillStyle='#ddd';for(let i=0;i<8;i++)jumpCtx.fillRect(cx-s*0.3+i*s*0.08,cy+s*0.3,s*0.04,s*0.15);
+}
+function updateJumpscare(){if(jumpScareTimer>0){jumpScareTimer--;if(jumpScareTimer<=0)document.getElementById('jumpOverlay').style.display='none';}}
+
+function updateAmbient(){
+  ambientTimer++;
+  if(ambientTimer%300===0&&Math.random()<0.3)showMsg("...did you hear that?");
+  if(ambientTimer%500===0&&Math.random()<0.15)triggerJumpscare();
+  if(ambientTimer%200===0&&Math.random()<0.2)screenShake=3;
+  if(Math.random()<0.02)spawnParticle(cameraX+Math.random()*GAME_W,cameraY+Math.random()*GAME_H,'#300',60);
+}
+
+function die(msg){
+  gameState='dead';document.getElementById('deathMsg').textContent=msg;
+  document.getElementById('deathOverlay').style.display='flex';
+  document.getElementById('gameHUD').style.display='none';
+  triggerJumpscare();
+}
+function win(){
+  gameState='won';
+  document.getElementById('winOverlay').style.display='flex';
+  document.getElementById('gameHUD').style.display='none';
+}
+function startGame(){
+  document.getElementById('startOverlay').style.display='none';
+  document.getElementById('deathOverlay').style.display='none';
+  document.getElementById('winOverlay').style.display='none';
+  document.getElementById('jumpOverlay').style.display='none';
+  document.getElementById('gameHUD').style.display='block';
+  initGame();gameState='playing';
+}
+
+function gameLoop(){
+  requestAnimationFrame(gameLoop);
+  if(gameState!=='playing')return;
+  time+=0.016;
+  if(screenShake>0){screenShake*=0.9;if(screenShake<0.5)screenShake=0;}
+  updatePlayer();updateMonster();updateParticles();updateMessages();updateJumpscare();updateAmbient();
+  ctx.save();
+  if(screenShake>0)ctx.translate((Math.random()-0.5)*screenShake,(Math.random()-0.5)*screenShake);
+  ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,GAME_W,GAME_H);
+  drawMap();drawParticles();drawPlayer();drawMonster();drawLighting();drawHUD();
+  if(player.sanity<40){ctx.fillStyle='rgba(50,0,0,'+(40-player.sanity)/100+')';ctx.fillRect(0,0,GAME_W,GAME_H);
+  const vig=ctx.createRadialGradient(GAME_W/2,GAME_H/2,GAME_W*0.2,GAME_W/2,GAME_H/2,GAME_W*0.6);
+  vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(0,0,0,0.8)');ctx.fillStyle=vig;ctx.fillRect(0,0,GAME_W,GAME_H);}
+  ctx.strokeStyle='#fff8';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(mouseX-8,mouseY);ctx.lineTo(mouseX+8,mouseY);ctx.moveTo(mouseX,mouseY-8);ctx.lineTo(mouseX,mouseY+8);ctx.stroke();
+  ctx.restore();
+}
+gameLoop();
+
+const sections=document.querySelectorAll('section');
+const observer=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting)e.target.style.opacity=1;});},{threshold:0.1});
+sections.forEach(s=>{s.style.opacity='0';s.style.transition='opacity 0.6s';observer.observe(s);});
+</script>
+</body>
+</html>
